@@ -7,9 +7,9 @@ interface Props {
 }
 
 const SEGMENTS = [
-  { fill: "#185FA5" },
-  { fill: "#BA7517" },
-  { fill: "#1D9E75" },
+  { fill: "#185fa5" },
+  { fill: "#65a6e5" },
+  { fill: "#c8d4e0" },
 ];
 
 export default function CompMixChart({ data }: Props) {
@@ -19,7 +19,7 @@ export default function CompMixChart({ data }: Props) {
     <section className="panel">
       <header className="panel-head">
         <h2 className="panel-title">Compensation Mix</h2>
-        <span className="panel-sub">Avg component breakdown · % of total</span>
+        <span className="panel-sub">Annual compensation · avg component breakdown</span>
       </header>
       <div
         className="panel-body"
@@ -54,14 +54,15 @@ export default function CompMixChart({ data }: Props) {
                   {slice.pct > 8 && (
                     <span
                       style={{
-                        color: "#fff",
+                        color: i === 2 ? "var(--color-ink)" : "#fff",
                         fontSize: 11,
-                        fontFamily: "var(--font-sans)",
+                        fontFamily: "var(--font-mono)",
                         fontWeight: 500,
                         whiteSpace: "nowrap",
+                        fontVariantNumeric: "tabular-nums",
                       }}
                     >
-                      {`${slice.component} ${Math.round(slice.pct)}%`}
+                      {formatCompPrecise(slice.value)}
                     </span>
                   )}
                 </div>
@@ -93,16 +94,6 @@ export default function CompMixChart({ data }: Props) {
                     }}
                   >
                     {slice.component}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 11,
-                      color: "var(--color-ink)",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {`${Math.round(slice.pct)}%`}
                   </span>
                 </div>
               ))}

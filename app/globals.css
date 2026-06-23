@@ -147,7 +147,7 @@ h1,
 
 .page-shell {
   display: grid;
-  grid-template-rows: 56px 48px 72px 1fr 32px;
+  grid-template-rows: 56px 76px 100px 1fr 32px;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
@@ -223,7 +223,8 @@ h1,
 .pill-group {
   display: flex;
   gap: 4px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 .pill {
