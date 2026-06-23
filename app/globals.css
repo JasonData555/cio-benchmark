@@ -1,0 +1,526 @@
+/* ============================================================
+   CIO Benchmark Microsite — Design System ("Ink & Champagne")
+   Plain CSS + custom properties. No Tailwind.
+   Desktop-first, single-page, no-scroll. See design.md.
+   ============================================================ */
+
+:root {
+  /* ---- palette ---- */
+  --color-bg: #faf9f5;
+  --color-surface: #f2f0ea;
+  --color-surface-blue: #eef4fb;
+  --color-surface-amber: #fdf8ee;
+  --color-border: rgba(0, 0, 0, 0.08);
+  --color-border-strong: rgba(0, 0, 0, 0.15);
+
+  --color-ink: #1a1a18;
+  --color-ink-secondary: #444441;
+  --color-ink-tertiary: #6b6b67;
+  --color-ink-muted: #9b9b97;
+
+  --color-blue: #185fa5;
+  --color-blue-mid: #378add;
+  --color-blue-light: #eef4fb;
+
+  --color-amber: #ba7517;
+  --color-amber-mid: #ef9f27;
+  --color-amber-light: #fdf8ee;
+
+  --color-champagne: #c9a96e;
+
+  /* ---- typography ---- */
+  --font-display: var(--font-display-google), "Cormorant Garamond", Georgia, serif;
+  --font-sans: var(--font-sans-google), "DM Sans", system-ui, sans-serif;
+  --font-mono: var(--font-mono-google), "IBM Plex Mono", "Courier New", monospace;
+
+  /* ---- metrics ---- */
+  --gap: 14px;
+  --radius: 10px;
+
+  /* ---- legacy aliases (consumed by chart components via var()) ---- */
+  --ink: var(--color-ink);
+  --muted: var(--color-ink-tertiary);
+  --grid: var(--color-border);
+  --border: var(--color-border);
+  --panel: #ffffff;
+  --accent: var(--color-blue);
+  --c1: var(--color-blue);        /* industry bars, box stroke, mix "Base" */
+  --c2: var(--color-blue-mid);    /* comp-by-size bars */
+  --c3: var(--color-amber-mid);   /* functions bars, mix "Bonus" */
+  --c4: var(--color-blue-light);  /* box IQR fill */
+  --c5: var(--color-champagne);   /* mix "Equity" */
+}
+
+/*
+  next/font (layout.tsx) injects the loaded families under --font-*-google,
+  scoped to <body> via className. The --font-* tokens above compose those with
+  the specified fallback stacks; they are consumed everywhere inside <body>.
+*/
+
+/* ---------- base reset ---------- */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--color-bg);
+}
+
+body {
+  color: var(--color-ink-secondary);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow: hidden; /* enforce single-page, no-scroll */
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+  margin: 0;
+}
+
+/* ---------- typography scale ---------- */
+
+h1,
+.display-heading {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--color-ink);
+}
+
+.section-heading {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-ink-tertiary);
+}
+
+.panel-title {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.005em;
+  color: var(--color-ink);
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  color: var(--color-ink-tertiary);
+}
+
+.data-value,
+.stat-value {
+  font-family: var(--font-mono);
+  font-weight: 400;
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.footnote {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--color-ink-muted);
+}
+
+/* ---------- app shell ---------- */
+
+.page-shell {
+  display: grid;
+  grid-template-rows: 56px 48px 72px 1fr 32px;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ---------- header ---------- */
+
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  background: #ffffff;
+  border-bottom: 0.5px solid var(--color-border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.header-right {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--color-ink-tertiary);
+}
+
+/* ---------- filter bar ---------- */
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-surface);
+  border-bottom: 0.5px solid var(--color-border);
+  flex-wrap: wrap;
+  overflow: hidden;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-field-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-tertiary);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* --- industry pills --- */
+
+.pill-group {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 11px;
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: all 0.1s;
+  line-height: 1.4;
+}
+
+.pill-active {
+  background: var(--color-blue);
+  color: #fff;
+  border: none;
+}
+
+.pill-inactive {
+  background: transparent;
+  color: var(--color-ink-secondary);
+  border: 0.5px solid var(--color-border-strong);
+}
+
+.pill-inactive:hover {
+  background: var(--color-surface-blue);
+  color: var(--color-blue);
+  border-color: var(--color-blue);
+}
+
+/* --- structure dropdown --- */
+
+.filter-select {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  height: 30px;
+  border: 0.5px solid var(--color-border-strong);
+  border-radius: 6px;
+  background: #fff;
+  padding: 0 8px;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--color-blue);
+}
+
+/* --- size range slider --- */
+
+.range-slider-wrap {
+  position: relative;
+  width: 180px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+}
+
+.range-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 4px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.range-slider-wrap input[type="range"] {
+  position: absolute;
+  width: 100%;
+  pointer-events: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 4px;
+  margin: 0;
+}
+
+.range-slider-wrap input[type="range"]::-webkit-slider-thumb {
+  pointer-events: all;
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--color-blue);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.range-slider-wrap input[type="range"]::-moz-range-thumb {
+  pointer-events: all;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--color-blue);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.range-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--color-ink-secondary);
+  white-space: nowrap;
+  display: block;
+  margin-bottom: 6px;
+}
+
+/* --- right side --- */
+
+.filter-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-ink-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.filter-reset {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--color-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.filter-reset:hover {
+  color: var(--color-blue-mid);
+}
+
+/* ---------- stat cards ---------- */
+
+.stats-row {
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  padding: 0.75rem 1.5rem;
+  overflow: hidden;
+}
+
+.stat-card {
+  flex: 1;
+  background: #ffffff;
+  border: 0.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: transparent;
+}
+
+.stat-card--blue::before  { background: var(--color-blue); }
+.stat-card--amber::before { background: var(--color-amber); }
+
+.stat-label {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--color-ink-tertiary);
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.stat-sub {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--color-ink-muted);
+  margin-top: 4px;
+}
+
+/* ---------- chart grid ---------- */
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "box box mix"
+    "size industry functions";
+  gap: 12px;
+  padding: 0 1.5rem 1rem;
+  min-height: 0;
+}
+
+.area-box { grid-area: box; min-height: 0; }
+.area-industry { grid-area: industry; min-height: 0; }
+.area-size { grid-area: size; min-height: 0; }
+.area-mix { grid-area: mix; min-height: 0; }
+.area-functions { grid-area: functions; min-height: 0; }
+
+/* ---------- box plot panel ---------- */
+
+.box-panel-head {
+  margin-bottom: 4px;
+}
+
+.box-legend {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: var(--color-ink-secondary);
+  margin-bottom: 4px;
+}
+
+/* ---------- panels ---------- */
+
+.panel {
+  background: #ffffff;
+  border: 0.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.panel-sub {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  color: var(--color-ink-muted);
+  white-space: nowrap;
+}
+
+.panel-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.panel-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink-muted);
+  font-size: 12px;
+}
+
+
+/* ---------- footer ---------- */
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-top: 0.5px solid var(--color-border);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 10px;
+  color: var(--color-ink-muted);
+}
+
+/* ---------- recharts: numeric data labels in mono ---------- */
+
+.recharts-label-list text {
+  font-family: var(--font-mono);
+}
