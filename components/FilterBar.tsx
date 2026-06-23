@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   FilterState,
   SIZE_LABELS,
@@ -16,6 +17,20 @@ interface FilterBarProps {
   structures: string[];
 }
 
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.15s ease" }}
+    >
+      <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 export default function FilterBar({
   filters,
   onChange,
@@ -23,6 +38,16 @@ export default function FilterBar({
   industries,
   structures,
 }: FilterBarProps) {
+  const [openSections, setOpenSections] = useState({
+    industry: true,
+    structure: false,
+    size: false,
+  });
+
+  const toggleSection = (key: keyof typeof openSections) => {
+    setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
   const toggleIndustry = (industry: string) => {
     if (industry === "All") {
       onChange({ ...filters, industries: [] });
@@ -35,108 +60,186 @@ export default function FilterBar({
   };
 
   const setSizeMin = (v: number) => {
-    const next = Math.min(v, filters.sizeMax);
-    onChange({ ...filters, sizeMin: next });
+    onChange({ ...filters, sizeMin: Math.min(v, filters.sizeMax) });
   };
 
   const setSizeMax = (v: number) => {
-    const next = Math.max(v, filters.sizeMin);
-    onChange({ ...filters, sizeMax: next });
+    onChange({ ...filters, sizeMax: Math.max(v, filters.sizeMin) });
   };
 
   const pct = (v: number) => `${((v - 1) / (SIZE_MAX - 1)) * 100}%`;
 
   const trackStyle = {
     background: `linear-gradient(to right,
-      var(--color-border) ${pct(filters.sizeMin)},
+      var(--color-border-strong) ${pct(filters.sizeMin)},
       var(--color-blue) ${pct(filters.sizeMin)},
       var(--color-blue) ${pct(filters.sizeMax)},
-      var(--color-border) ${pct(filters.sizeMax)})`,
+      var(--color-border-strong) ${pct(filters.sizeMax)})`,
   };
 
   const sizeLabel =
     filters.sizeMin === 1 && filters.sizeMax === SIZE_MAX
       ? "All sizes"
-      : `${SIZE_LABELS[filters.sizeMin]}–${SIZE_LABELS[filters.sizeMax]} employees`;
+      : `${SIZE_LABELS[filters.sizeMin]} – ${SIZE_LABELS[filters.sizeMax]}`;
+
+  const industryCount = filters.industries.length;
+  const hasActiveFilters = !isDefaultState(filters);
 
   return (
-    <div className="filter-bar">
-      <div className="filter-group">
-        {/* Industry pills */}
-        <div className="filter-field">
-          <span className="filter-field-label">Industry</span>
-          <div className="pill-group">
-            <button
-              className={`pill ${filters.industries.length === 0 ? "pill-active" : "pill-inactive"}`}
-              onClick={() => toggleIndustry("All")}
-            >
-              All
-            </button>
-            {industries.map((ind) => (
-              <button
-                key={ind}
-                className={`pill ${filters.industries.includes(ind) ? "pill-active" : "pill-inactive"}`}
-                onClick={() => toggleIndustry(ind)}
-              >
-                {ind}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Structure dropdown */}
-        <div className="filter-field">
-          <span className="filter-field-label">Structure</span>
-          <select
-            className="filter-select"
-            value={filters.structure}
-            onChange={(e) => onChange({ ...filters, structure: e.target.value })}
-          >
-            <option value="All">All Structures</option>
-            {structures.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Company size dual-handle slider */}
-        <div className="filter-field">
-          <span className="filter-field-label">Company Size</span>
-          <span className="range-label">{sizeLabel}</span>
-          <div className="range-slider-wrap">
-            <div className="range-track" style={trackStyle} />
-            <input
-              type="range"
-              min={1}
-              max={SIZE_MAX}
-              value={filters.sizeMin}
-              onChange={(e) => setSizeMin(Number(e.target.value))}
-            />
-            <input
-              type="range"
-              min={1}
-              max={SIZE_MAX}
-              value={filters.sizeMax}
-              onChange={(e) => setSizeMax(Number(e.target.value))}
-            />
-          </div>
-        </div>
+    <aside className="filter-sidebar">
+      {/* Sidebar header */}
+      <div className="sidebar-top">
+        <span className="sidebar-top-label">Filters</span>
+        <span className="filter-count">n={counts.total}</span>
       </div>
 
-      {/* Right side */}
-      <div className="filter-right">
-        <span className="filter-count">n={counts.total} CIOs</span>
-        {!isDefaultState(filters) && (
-          <button
-            className="filter-reset"
-            onClick={() => onChange(defaultFilterState)}
-          >
-            Reset filters
-          </button>
+      {hasActiveFilters && (
+        <button
+          className="sidebar-reset"
+          onClick={() => onChange(defaultFilterState)}
+        >
+          Reset all filters
+        </button>
+      )}
+
+      {/* Industry */}
+      <div className="sidebar-section">
+        <button
+          className="sidebar-section-trigger"
+          onClick={() => toggleSection("industry")}
+        >
+          <span className="sidebar-section-title">
+            Industry
+            {industryCount > 0 && (
+              <span className="sidebar-badge">{industryCount}</span>
+            )}
+          </span>
+          <span className="sidebar-chevron">
+            <ChevronIcon open={openSections.industry} />
+          </span>
+        </button>
+
+        {openSections.industry && (
+          <div className="sidebar-section-body">
+            <div className="sidebar-check-list">
+              {/* "All" row */}
+              <div
+                className={`sidebar-check-item ${filters.industries.length === 0 ? "sidebar-check-item--active" : ""}`}
+                onClick={() => toggleIndustry("All")}
+              >
+                <span className={`sidebar-check-box ${filters.industries.length === 0 ? "sidebar-check-box--checked" : ""}`}>
+                  {filters.industries.length === 0 && (
+                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                      <path d="M1.5 4L3.2 5.7L6.5 2.3" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+                <span className="sidebar-check-label">All Industries</span>
+              </div>
+
+              {industries.map((ind) => {
+                const active = filters.industries.includes(ind);
+                return (
+                  <div
+                    key={ind}
+                    className={`sidebar-check-item ${active ? "sidebar-check-item--active" : ""}`}
+                    onClick={() => toggleIndustry(ind)}
+                  >
+                    <span className={`sidebar-check-box ${active ? "sidebar-check-box--checked" : ""}`}>
+                      {active && (
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                          <path d="M1.5 4L3.2 5.7L6.5 2.3" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </span>
+                    <span className="sidebar-check-label">{ind}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
-    </div>
+
+      {/* Company Structure */}
+      <div className="sidebar-section">
+        <button
+          className="sidebar-section-trigger"
+          onClick={() => toggleSection("structure")}
+        >
+          <span className="sidebar-section-title">
+            Structure
+            {filters.structure !== "All" && (
+              <span className="sidebar-badge">1</span>
+            )}
+          </span>
+          <span className="sidebar-chevron">
+            <ChevronIcon open={openSections.structure} />
+          </span>
+        </button>
+
+        {openSections.structure && (
+          <div className="sidebar-section-body">
+            <select
+              className="sidebar-select"
+              value={filters.structure}
+              onChange={(e) => onChange({ ...filters, structure: e.target.value })}
+            >
+              <option value="All">All Structures</option>
+              {structures.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+      </div>
+
+      {/* Company Size */}
+      <div className="sidebar-section">
+        <button
+          className="sidebar-section-trigger"
+          onClick={() => toggleSection("size")}
+        >
+          <span className="sidebar-section-title">
+            Company Size
+            {(filters.sizeMin !== 1 || filters.sizeMax !== SIZE_MAX) && (
+              <span className="sidebar-badge">1</span>
+            )}
+          </span>
+          <span className="sidebar-chevron">
+            <ChevronIcon open={openSections.size} />
+          </span>
+        </button>
+
+        {openSections.size && (
+          <div className="sidebar-section-body">
+            <span className="sidebar-size-label">{sizeLabel}</span>
+            <div className="range-slider-wrap">
+              <div className="range-track" style={trackStyle} />
+              <input
+                type="range"
+                min={1}
+                max={SIZE_MAX}
+                value={filters.sizeMin}
+                onChange={(e) => setSizeMin(Number(e.target.value))}
+              />
+              <input
+                type="range"
+                min={1}
+                max={SIZE_MAX}
+                value={filters.sizeMax}
+                onChange={(e) => setSizeMax(Number(e.target.value))}
+              />
+            </div>
+            <div className="sidebar-size-ends">
+              <span>{SIZE_LABELS[1]}</span>
+              <span>{SIZE_LABELS[SIZE_MAX]}</span>
+            </div>
+          </div>
+        )}
+      </div>
+    </aside>
   );
 }

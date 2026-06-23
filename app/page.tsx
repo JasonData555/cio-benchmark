@@ -53,7 +53,7 @@ export default function Home() {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/hitch-logo.png" height={28} alt="Hitch Partners" />
         <h1 className="header-title">CIO Compensation Benchmark</h1>
-        <span className="header-right">{data.meta.region} · {data.meta.year}</span>
+        <span className="header-right">{data.meta.region} · {data.meta.year} · n={stats.n}</span>
       </header>
 
       <FilterBar
@@ -64,31 +64,32 @@ export default function Home() {
         structures={allStructures}
       />
 
-      <section className="stats-row">
-        <StatCard label="Median Total Comp" value={formatCompPrecise(stats.median)} accent="blue" />
-        <StatCard label="Mean Total Comp"   value={formatCompPrecise(stats.mean)} />
-        <StatCard label="90th Percentile"   value={formatCompPrecise(stats.p90)} />
-        <StatCard label="20th Percentile"   value={formatCompPrecise(stats.p20)} />
-        <StatCard label="Sample Size"       value={`n=${stats.n}`} sub="CIOs in view" />
-      </section>
+      <div className="content-main">
+        <section className="stats-row">
+          <StatCard label="Median Total Comp" value={formatCompPrecise(stats.median)} accent="blue" />
+          <StatCard label="Mean Total Comp"   value={formatCompPrecise(stats.mean)} />
+          <StatCard label="90th Percentile"   value={formatCompPrecise(stats.p90)} />
+          <StatCard label="20th Percentile"   value={formatCompPrecise(stats.p20)} />
+        </section>
 
-      <section className="dashboard-grid">
-        <div className="area-box">
-          <BoxPlotChart data={stats} />
-        </div>
-        <div className="area-mix">
-          <CompMixChart data={mix} />
-        </div>
-        <div className="area-size">
-          <CompBySizeChart data={bySize} />
-        </div>
-        <div className="area-industry">
-          <CompByIndustryChart data={byIndustry} />
-        </div>
-        <div className="area-functions">
-          <FunctionsChart data={functions} />
-        </div>
-      </section>
+        <section className="dashboard-grid">
+          <div className="area-box">
+            <BoxPlotChart data={stats} />
+          </div>
+          <div className="area-mix">
+            <CompMixChart data={mix} />
+          </div>
+          <div className="area-size">
+            <CompBySizeChart data={bySize} />
+          </div>
+          <div className="area-industry">
+            <CompByIndustryChart data={byIndustry} />
+          </div>
+          <div className="area-functions">
+            <FunctionsChart data={functions} />
+          </div>
+        </section>
+      </div>
 
       <Footer
         source={data.meta.source}
