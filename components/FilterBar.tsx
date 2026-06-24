@@ -3,8 +3,6 @@
 import { useState } from "react";
 import {
   FilterState,
-  SIZE_LABELS,
-  SIZE_MAX,
   defaultFilterState,
   isDefaultState,
 } from "@/lib/filters";
@@ -38,35 +36,11 @@ export default function FilterBar({
 }: FilterBarProps) {
   const [openSections, setOpenSections] = useState({
     structure: false,
-    size: false,
   });
 
   const toggleSection = (key: keyof typeof openSections) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
-
-  const setSizeMin = (v: number) => {
-    onChange({ ...filters, sizeMin: Math.min(v, filters.sizeMax) });
-  };
-
-  const setSizeMax = (v: number) => {
-    onChange({ ...filters, sizeMax: Math.max(v, filters.sizeMin) });
-  };
-
-  const pct = (v: number) => `${((v - 1) / (SIZE_MAX - 1)) * 100}%`;
-
-  const trackStyle = {
-    background: `linear-gradient(to right,
-      var(--color-border-strong) ${pct(filters.sizeMin)},
-      var(--color-blue) ${pct(filters.sizeMin)},
-      var(--color-blue) ${pct(filters.sizeMax)},
-      var(--color-border-strong) ${pct(filters.sizeMax)})`,
-  };
-
-  const sizeLabel =
-    filters.sizeMin === 1 && filters.sizeMax === SIZE_MAX
-      ? "All sizes"
-      : `${SIZE_LABELS[filters.sizeMin]} – ${SIZE_LABELS[filters.sizeMax]}`;
 
   const hasActiveFilters = !isDefaultState(filters);
 
@@ -118,51 +92,6 @@ export default function FilterBar({
                 </option>
               ))}
             </select>
-          </div>
-        )}
-      </div>
-
-      {/* Company Size */}
-      <div className="sidebar-section">
-        <button
-          className="sidebar-section-trigger"
-          onClick={() => toggleSection("size")}
-        >
-          <span className="sidebar-section-title">
-            Company Size
-            {(filters.sizeMin !== 1 || filters.sizeMax !== SIZE_MAX) && (
-              <span className="sidebar-badge">1</span>
-            )}
-          </span>
-          <span className="sidebar-chevron">
-            <ChevronIcon open={openSections.size} />
-          </span>
-        </button>
-
-        {openSections.size && (
-          <div className="sidebar-section-body">
-            <span className="sidebar-size-label">{sizeLabel}</span>
-            <div className="range-slider-wrap">
-              <div className="range-track" style={trackStyle} />
-              <input
-                type="range"
-                min={1}
-                max={SIZE_MAX}
-                value={filters.sizeMin}
-                onChange={(e) => setSizeMin(Number(e.target.value))}
-              />
-              <input
-                type="range"
-                min={1}
-                max={SIZE_MAX}
-                value={filters.sizeMax}
-                onChange={(e) => setSizeMax(Number(e.target.value))}
-              />
-            </div>
-            <div className="sidebar-size-ends">
-              <span>{SIZE_LABELS[1]}</span>
-              <span>{SIZE_LABELS[SIZE_MAX]}</span>
-            </div>
           </div>
         )}
       </div>

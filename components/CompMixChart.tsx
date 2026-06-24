@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { MixSlice, formatCompPrecise } from "@/lib/dataUtils";
 
 interface Props {
@@ -13,6 +14,8 @@ const SEGMENTS = [
 ];
 
 export default function CompMixChart({ data }: Props) {
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [tipPos, setTipPos] = useState({ x: 0, y: 0 });
   const isEmpty = data.every((d) => d.value === 0);
 
   return (
@@ -23,7 +26,7 @@ export default function CompMixChart({ data }: Props) {
       </header>
       <div
         className="panel-body"
-        style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}
+        style={{ display: "flex", flexDirection: "column" }}
       >
         {isEmpty ? (
           <div className="panel-empty">No data for current filters</div>
@@ -38,6 +41,7 @@ export default function CompMixChart({ data }: Props) {
                 overflow: "hidden",
                 width: "100%",
               }}
+              onMouseLeave={() => setHovered(null)}
             >
               {data.map((slice, i) => (
                 <div
@@ -49,13 +53,16 @@ export default function CompMixChart({ data }: Props) {
                     alignItems: "center",
                     justifyContent: "center",
                     overflow: "hidden",
+                    cursor: "default",
                   }}
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseMove={(e) => setTipPos({ x: e.clientX, y: e.clientY })}
                 >
                   {slice.pct > 8 && (
                     <span
                       style={{
                         color: i === 2 ? "var(--color-ink)" : "#fff",
-                        fontSize: 13,
+                        fontSize: 15,
                         fontFamily: "var(--font-mono)",
                         fontWeight: 500,
                         whiteSpace: "nowrap",
@@ -68,6 +75,55 @@ export default function CompMixChart({ data }: Props) {
                 </div>
               ))}
             </div>
+
+            {/* Hover tooltip */}
+            {hovered !== null && (
+              <div
+                style={{
+                  position: "fixed",
+                  left: tipPos.x + 14,
+                  top: tipPos.y - 56,
+                  background: "#fff",
+                  border: "0.5px solid var(--color-border)",
+                  borderRadius: 6,
+                  padding: "8px 12px",
+                  pointerEvents: "none",
+                  zIndex: 50,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.10)",
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    fontWeight: 600,
+                    color: "var(--color-ink)",
+                    fontSize: 12,
+                    marginBottom: 3,
+                  }}
+                >
+                  {data[hovered].component}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--color-blue)",
+                    fontSize: 13,
+                  }}
+                >
+                  {formatCompPrecise(data[hovered].value)}
+                </div>
+                <div
+                  style={{
+                    fontFamily: "var(--font-sans)",
+                    color: "var(--color-ink-muted)",
+                    fontSize: 11,
+                    marginTop: 2,
+                  }}
+                >
+                  {data[hovered].pct.toFixed(1)}% of total
+                </div>
+              </div>
+            )}
 
             {/* Legend pills */}
             <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
@@ -98,7 +154,6 @@ export default function CompMixChart({ data }: Props) {
                 </div>
               ))}
             </div>
-
           </>
         )}
       </div>

@@ -33,7 +33,7 @@ function SizeTick({
         x={-4}
         textAnchor="end"
         fill="var(--color-ink)"
-        fontSize={11}
+        fontSize={13}
         fontFamily="var(--font-sans)"
         dy="-3"
       >
@@ -44,7 +44,7 @@ function SizeTick({
           x={-4}
           textAnchor="end"
           fill="var(--color-ink-muted)"
-          fontSize={10}
+          fontSize={11}
           fontFamily="var(--font-sans)"
           dy="9"
         >
@@ -149,7 +149,7 @@ export default function CompBySizeChart({ data }: Props) {
                   formatter={(v) => formatCurrency(Number(v))}
                   style={{
                     fill: "var(--color-ink)",
-                    fontSize: 11,
+                    fontSize: 13,
                     fontFamily: "var(--font-mono)",
                     fontWeight: 600,
                   }}
