@@ -99,35 +99,6 @@ export default function CompMixChart({ data }: Props) {
               ))}
             </div>
 
-            {/* Metric callouts */}
-            <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
-              {data.map((slice) => (
-                <div key={slice.component}>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-sans)",
-                      fontSize: 12,
-                      color: "var(--color-ink-muted)",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                      marginBottom: 3,
-                    }}
-                  >
-                    {`Avg ${slice.component}`}
-                  </div>
-                  <div
-                    style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 15,
-                      color: "var(--color-ink)",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {formatCompPrecise(slice.value)}
-                  </div>
-                </div>
-              ))}
-            </div>
           </>
         )}
       </div>

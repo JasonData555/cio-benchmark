@@ -14,9 +14,9 @@ const INK2 = "#444441";
 
 const PAD_L = 56;
 const PAD_R = 40;
-const SVG_H = 160;
+const SVG_H = 110;
 const AXIS_Y = SVG_H - 20;   // x-axis line y position
-const BOX_CY = 72;            // center y of box plot
+const BOX_CY = 45;            // center y of box plot
 const BOX_H = 34;
 const CAP_H = 12;
 const D = 6;                  // mean diamond half-size
@@ -34,27 +34,20 @@ function niceRange(lo: number, hi: number): number[] {
   return Array.from({ length: TICK_COUNT }, (_, i) => lo + step * i);
 }
 
-interface LabelProps {
-  x: number;
-  y: number;
-  name: string;
-  value: string;
-  color: string;
-  anchor?: "start" | "middle" | "end";
-}
+const STATS_LABEL: React.CSSProperties = {
+  fontFamily: "var(--font-sans)",
+  fontSize: 11,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  color: "var(--color-ink-muted)",
+  marginBottom: 3,
+};
 
-function ChartLabel({ x, y, name, value, color, anchor = "middle" }: LabelProps) {
-  return (
-    <g>
-      <text x={x} y={y} textAnchor={anchor} fill={color} fontSize={12} fontFamily="var(--font-sans)">
-        {name}
-      </text>
-      <text x={x} y={y + 15} textAnchor={anchor} fill={color} fontSize={13} fontFamily="var(--font-mono)">
-        {value}
-      </text>
-    </g>
-  );
-}
+const STATS_VALUE: React.CSSProperties = {
+  fontFamily: "var(--font-mono)",
+  fontSize: 14,
+  fontVariantNumeric: "tabular-nums",
+};
 
 export default function BoxPlotChart({ data }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -79,10 +72,6 @@ export default function BoxPlotChart({ data }: Props) {
   const boxTop = BOX_CY - BOX_H / 2;
   const boxBot = BOX_CY + BOX_H / 2;
 
-  // Label rows above and below
-  const LA = boxTop - 34;   // labels above box (p25, median, p75)
-  const LC = boxBot + 22;   // mean label below
-
   const ticks = niceRange(lo, hi);
 
   const xP25  = sc(p25);
@@ -90,6 +79,14 @@ export default function BoxPlotChart({ data }: Props) {
   const xMean = sc(mean);
   const xP75  = sc(p75);
   const xP90  = sc(p90);
+
+  const stats = [
+    { label: "P25",    value: formatCompPrecise(p25),    color: INK2 },
+    { label: "Median", value: formatCompPrecise(median), color: BLUE },
+    { label: "Mean",   value: formatCompPrecise(mean),   color: AMBER },
+    { label: "P75",    value: formatCompPrecise(p75),    color: INK2 },
+    { label: "P90",    value: formatCompPrecise(p90),    color: INK2 },
+  ];
 
   return (
     <section className="panel">
@@ -103,7 +100,7 @@ export default function BoxPlotChart({ data }: Props) {
         <span style={{ color: AMBER }}>◆ Mean</span>
       </div>
 
-      <div ref={containerRef} style={{ width: "100%", flex: 1, minHeight: 0 }}>
+      <div ref={containerRef} style={{ width: "100%", minHeight: 0 }}>
         {width > 0 && (
           <svg width={width} height={SVG_H} style={{ display: "block", overflow: "visible" }}>
             {/* Vertical grid lines at ticks */}
@@ -111,7 +108,7 @@ export default function BoxPlotChart({ data }: Props) {
               <line
                 key={i}
                 x1={sc(t)} x2={sc(t)}
-                y1={boxTop - 36} y2={AXIS_Y}
+                y1={boxTop - 8} y2={AXIS_Y}
                 stroke="var(--color-border)"
                 strokeWidth={1}
                 strokeDasharray="3 3"
@@ -177,15 +174,27 @@ export default function BoxPlotChart({ data }: Props) {
               points={`${xMean},${BOX_CY - D} ${xMean + D},${BOX_CY} ${xMean},${BOX_CY + D} ${xMean - D},${BOX_CY}`}
               fill={AMBER}
             />
-
-            {/* Labels */}
-            <ChartLabel x={xP25}      y={LA}            name="P25"    value={formatCompPrecise(p25)}    color={INK2}  anchor="start" />
-            <ChartLabel x={xMed}      y={LA}            name="Median" value={formatCompPrecise(median)} color={BLUE}  anchor="middle" />
-            <ChartLabel x={xP75}      y={LA}            name="P75"    value={formatCompPrecise(p75)}    color={INK2}  anchor="end" />
-            <ChartLabel x={xP90 + 10} y={BOX_CY - 10}  name="P90"    value={formatCompPrecise(p90)}    color={INK2}  anchor="start" />
-            <ChartLabel x={xMean}     y={LC}            name="Mean"   value={formatCompPrecise(mean)}   color={AMBER} anchor="middle" />
           </svg>
         )}
+      </div>
+
+      {/* Stats table */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          paddingLeft: PAD_L,
+          paddingRight: PAD_R,
+          marginTop: 10,
+          marginBottom: 8,
+        }}
+      >
+        {stats.map((s) => (
+          <div key={s.label} style={{ textAlign: "center" }}>
+            <div style={STATS_LABEL}>{s.label}</div>
+            <div style={{ ...STATS_VALUE, color: s.color }}>{s.value}</div>
+          </div>
+        ))}
       </div>
 
       <p className="footnote" style={{ marginTop: 4 }}>
