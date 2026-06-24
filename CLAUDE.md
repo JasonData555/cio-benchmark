@@ -15,65 +15,90 @@ Client-facing intelligence product: clean, credible, chart-led, minimal copy.
 ## Layout / structure
 ```
 app/
-  layout.tsx     root layout, Geist local fonts, metadata
-  page.tsx       the dashboard (client component); holds filter state + aggregation
-  globals.css    design tokens + single-page no-scroll grid (see design.md)
+  layout.tsx     root layout, Cormorant Garamond + DM Sans + IBM Plex Mono fonts, metadata
+  page.tsx       dashboard (client component); holds FilterState + calls aggregators
+  globals.css    design tokens, sidebar+grid layout (see design.md)
 components/
-  FilterBar.tsx          industry / company-size / gender selects
-  StatCard.tsx           KPI card
-  BoxPlotChart.tsx       total-comp distribution by size (custom box-plot shape)
-  CompBySizeChart.tsx    median total comp by company size (bar)
-  CompByIndustryChart.tsx median total comp by industry (horizontal bar)
-  CompMixChart.tsx       base/bonus/equity pay mix (donut + legend)
-  FunctionsChart.tsx     functions under CIO authority (horizontal bar)
-  Footer.tsx             source attribution + logo
+  FilterBar.tsx           vertical accordion sidebar: industry checkboxes, structure
+                          dropdown, dual-range size slider, reset button, live n= count
+  StatCard.tsx            KPI card (label + value + optional accent color)
+  BoxPlotChart.tsx        total-comp distribution — custom ResizeObserver + pure SVG
+                          (whisker, IQR box, median line, mean diamond, direct labels)
+  CompBySizeChart.tsx     median total comp by company size (recharts horizontal bar)
+  CompByIndustryChart.tsx median total comp by industry (horizontal bars, gradient color)
+  CompMixChart.tsx        base/bonus/equity mix (stacked horizontal bar + metric callouts)
+  FunctionsChart.tsx      functions under CIO authority (% respondents, horizontal bars)
+  Footer.tsx              source attribution + logo
 data/
-  CIO-Comp-Data.csv      source dataset (143+ real records)
-  cio_data.json          generated app data: { meta, records[] }
+  CIO-Comp-Data.csv       source dataset (143+ real records)
+  cio_data.json           processed app data: { meta, records[] }
 lib/
-  dataUtils.ts   types (CIORecord/CIOData), formatters, stats, chart aggregators
-  filters.ts     Filters type, applyFilters, filterOptions (data-driven)
+  dataUtils.ts    types, formatters, stats helpers, chart aggregators
+  filters.ts      FilterState type, applyFilterState, isDefaultState, SIZE_LABELS
 public/
-  hitch-logo.png Hitch Partners logo
+  hitch-logo.png  Hitch Partners logo
 ```
 
-## Data flow
-`data/cio_data.json` is loaded in `page.tsx` → `applyFilters(records, filters)`
-(`lib/filters.ts`) → aggregators in `lib/dataUtils.ts` (`compBySize`,
-`compByIndustry`, `compMix`, `functionsBreakdown`, `median`, `percentileStats`)
-→ chart components. **Charts receive already-filtered, pre-aggregated arrays** so
-everything stays in sync with the FilterBar.
+## Page layout
+The `.app` CSS grid has two columns: a fixed-width **sidebar** (FilterBar) on the left
+and a **3-row × 2-column chart grid** on the right. `body { overflow: hidden }` — everything
+must fit one viewport. Chart cells use `min-height: 0` so `ResponsiveContainer` can shrink.
 
-### `cio_data.json` shape
+## Data flow
+`data/cio_data.json` → `applyFilterState(records, filterState)` (`lib/filters.ts`)
+→ aggregators in `lib/dataUtils.ts` → chart components.
+**Charts receive already-filtered, pre-aggregated arrays** — keep it that way.
+
+### FilterState (lib/filters.ts)
+```ts
+interface FilterState {
+  industries: string[];   // [] = all
+  structure: string;      // "" = all
+  sizeMin: number;        // index into SIZE_ORDER
+  sizeMax: number;
+}
+```
+Key exports: `applyFilterState`, `isDefaultState`, `SIZE_LABELS`, `DEFAULT_FILTER_STATE`
+
+### Key types & functions (lib/dataUtils.ts)
+Types: `CIORecord`, `CIOData`, `PercentileStats`, `SizeStat`, `IndustryStat`,
+`MixSlice`, `FunctionStat`, `DistributionStats`
+
+Aggregators: `compBySize`, `compByIndustry`, `compMix`, `functionsBreakdown`,
+`getCompDistribution`, `percentileStats`, `median`
+
+Formatters: `formatCompPrecise` ("$XM"/"$XK"), `formatCurrency`, `formatPercent`,
+`shortSize` (abbreviates size-band labels)
+
+### `cio_data.json` record shape
 ```jsonc
 {
-  "meta": { "title", "region", "source", "year", "currency", "n" },
-  "records": [
-    {
-      "title","titleLevel","gender","location","city","region","tenure",
-      "prevCISO","companySize","industry","companyStructure","reportsTo",
-      "currency","base","bonus","equity","totalComp",
-      "functions": ["…"], "teamSize","boardFreq","company"
-    }
-  ]
+  "title","titleLevel","gender","location","city","region","tenure","prevCISO",
+  "companySize","industry","companyStructure","reportsTo","currency",
+  "base","bonus","equity","totalComp","functions":["…"],"teamSize","boardFreq",
+  "company","sizeOrder"
 }
 ```
 
 ### Regenerating the data
-`cio_data.json` is produced from the CSV. The converter normalizes headers to the
-camelCase fields above, strips `$`/commas from money columns, and splits the
-multi-value "functions" column into an array. To regenerate after the CSV changes,
-re-run the conversion script (kept in the scratchpad during initial build; port it
-into `scripts/` if this becomes a recurring task).
+`cio_data.json` is produced from `CIO-Comp-Data-Revised.csv` via `scripts/csv-to-json.mjs`.
+Run `node scripts/csv-to-json.mjs` to regenerate. The script maps CSV columns to camelCase
+JSON fields, strips `$`/commas from money columns, splits the multi-value "functions" column
+into an array, derives `sizeOrder`, and includes only rows where `Role_Bucket === "CIO"` and
+`totalComp > 0` (139 records). Canonical source file: `CIO-Comp-Data-Revised.csv` (root).
+
+## CSS design tokens (globals.css)
+Colors: `--color-bg`, `--color-surface`, `--color-blue` (#185fa5), `--color-blue-mid`,
+`--color-amber`, `--color-amber-mid`, `--color-champagne`, `--color-ink*` (4 levels)
+Chart palette: `--c1` (blue) `--c2` (blue-mid) `--c3` (amber-mid) `--c4` (IQR fill) `--c5` (champagne)
+Type: `--font-display` (Cormorant Garamond) `--font-sans` (DM Sans) `--font-mono` (IBM Plex Mono)
+Spacing: `--gap: 14px` `--radius: 10px`
 
 ## Conventions
-- Recharts components and anything using hooks/state are `"use client"`.
-- Filter option lists are **derived from the data** (`filterOptions`), never hardcoded.
-- Chart colors come from CSS custom properties (`--c1`…`--c5`) referenced as
-  `var(--cN)` in SVG fills, so the palette is themed in one place (`globals.css`).
-- The whole UI must fit one viewport: `body { overflow: hidden }`, `.app` is a
-  full-height CSS grid. Charts sit in cells with `min-height: 0` so
-  `ResponsiveContainer` can shrink.
+- Anything using hooks/state/recharts must be `"use client"`.
+- Filter option lists are **derived from data**, never hardcoded.
+- Chart colors use `var(--cN)` CSS variables — palette changes go in `globals.css` only.
+- `BoxPlotChart` uses `ResizeObserver` (not `ResponsiveContainer`) — keep it that way.
 
 ## Commands
 - `npm run dev` — local dev at http://localhost:3000

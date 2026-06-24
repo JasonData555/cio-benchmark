@@ -46,10 +46,10 @@ interface LabelProps {
 function ChartLabel({ x, y, name, value, color, anchor = "middle" }: LabelProps) {
   return (
     <g>
-      <text x={x} y={y} textAnchor={anchor} fill={color} fontSize={9} fontFamily="var(--font-sans)">
+      <text x={x} y={y} textAnchor={anchor} fill={color} fontSize={12} fontFamily="var(--font-sans)">
         {name}
       </text>
-      <text x={x} y={y + 12} textAnchor={anchor} fill={color} fontSize={10} fontFamily="var(--font-mono)">
+      <text x={x} y={y + 15} textAnchor={anchor} fill={color} fontSize={13} fontFamily="var(--font-mono)">
         {value}
       </text>
     </g>
@@ -80,13 +80,11 @@ export default function BoxPlotChart({ data }: Props) {
   const boxBot = BOX_CY + BOX_H / 2;
 
   // Label rows above and below
-  const LA = boxTop - 26;   // outer labels (p20, median, p90)
-  const LB = boxTop - 12;   // inner labels (p25, p75)
-  const LC = boxBot + 18;   // mean label below
+  const LA = boxTop - 34;   // labels above box (p25, median, p75)
+  const LC = boxBot + 22;   // mean label below
 
   const ticks = niceRange(lo, hi);
 
-  const xP20  = sc(p20);
   const xP25  = sc(p25);
   const xMed  = sc(median);
   const xMean = sc(mean);
@@ -136,7 +134,7 @@ export default function BoxPlotChart({ data }: Props) {
                 y={AXIS_Y + 14}
                 textAnchor="middle"
                 fill="var(--color-ink-tertiary)"
-                fontSize={10}
+                fontSize={12}
                 fontFamily="var(--font-mono)"
               >
                 {tickFmt(t)}
@@ -145,12 +143,12 @@ export default function BoxPlotChart({ data }: Props) {
 
             {/* Whisker line p20→p90 */}
             <line
-              x1={xP20} x2={xP90} y1={BOX_CY} y2={BOX_CY}
+              x1={sc(p20)} x2={xP90} y1={BOX_CY} y2={BOX_CY}
               stroke={INK2} strokeWidth={1.5}
             />
             {/* p20 cap */}
             <line
-              x1={xP20} x2={xP20} y1={BOX_CY - CAP_H / 2} y2={BOX_CY + CAP_H / 2}
+              x1={sc(p20)} x2={sc(p20)} y1={BOX_CY - CAP_H / 2} y2={BOX_CY + CAP_H / 2}
               stroke={INK2} strokeWidth={1.5}
             />
             {/* p90 cap */}
@@ -181,12 +179,11 @@ export default function BoxPlotChart({ data }: Props) {
             />
 
             {/* Labels */}
-            <ChartLabel x={xP20}  y={LA} name="P20"    value={formatCompPrecise(p20)}    color={INK2} />
-            <ChartLabel x={xP25}  y={LB} name="P25"    value={formatCompPrecise(p25)}    color={INK2} />
-            <ChartLabel x={xMed}  y={LA} name="Median" value={formatCompPrecise(median)} color={BLUE} />
-            <ChartLabel x={xP75}  y={LB} name="P75"    value={formatCompPrecise(p75)}    color={INK2} />
-            <ChartLabel x={xP90}  y={LA} name="P90"    value={formatCompPrecise(p90)}    color={INK2} />
-            <ChartLabel x={xMean} y={LC} name="Mean"   value={formatCompPrecise(mean)}   color={AMBER} />
+            <ChartLabel x={xP25}      y={LA}            name="P25"    value={formatCompPrecise(p25)}    color={INK2}  anchor="start" />
+            <ChartLabel x={xMed}      y={LA}            name="Median" value={formatCompPrecise(median)} color={BLUE}  anchor="middle" />
+            <ChartLabel x={xP75}      y={LA}            name="P75"    value={formatCompPrecise(p75)}    color={INK2}  anchor="end" />
+            <ChartLabel x={xP90 + 10} y={BOX_CY - 10}  name="P90"    value={formatCompPrecise(p90)}    color={INK2}  anchor="start" />
+            <ChartLabel x={xMean}     y={LC}            name="Mean"   value={formatCompPrecise(mean)}   color={AMBER} anchor="middle" />
           </svg>
         )}
       </div>

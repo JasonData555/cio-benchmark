@@ -33,7 +33,7 @@ export default function CompMixChart({ data }: Props) {
             <div
               style={{
                 display: "flex",
-                height: 48,
+                height: 72,
                 borderRadius: 6,
                 overflow: "hidden",
                 width: "100%",
@@ -55,7 +55,7 @@ export default function CompMixChart({ data }: Props) {
                     <span
                       style={{
                         color: i === 2 ? "var(--color-ink)" : "#fff",
-                        fontSize: 11,
+                        fontSize: 13,
                         fontFamily: "var(--font-mono)",
                         fontWeight: 500,
                         whiteSpace: "nowrap",
@@ -70,16 +70,16 @@ export default function CompMixChart({ data }: Props) {
             </div>
 
             {/* Legend pills */}
-            <div style={{ display: "flex", gap: 12, marginTop: 10 }}>
+            <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
               {data.map((slice, i) => (
                 <div
                   key={slice.component}
-                  style={{ display: "flex", alignItems: "center", gap: 5 }}
+                  style={{ display: "flex", alignItems: "center", gap: 6 }}
                 >
                   <span
                     style={{
-                      width: 8,
-                      height: 8,
+                      width: 10,
+                      height: 10,
                       borderRadius: "50%",
                       background: SEGMENTS[i].fill,
                       flexShrink: 0,
@@ -89,7 +89,7 @@ export default function CompMixChart({ data }: Props) {
                   <span
                     style={{
                       fontFamily: "var(--font-sans)",
-                      fontSize: 11,
+                      fontSize: 13,
                       color: "var(--color-ink-secondary)",
                     }}
                   >
@@ -100,17 +100,17 @@ export default function CompMixChart({ data }: Props) {
             </div>
 
             {/* Metric callouts */}
-            <div style={{ display: "flex", gap: 16, marginTop: 12 }}>
+            <div style={{ display: "flex", gap: 24, marginTop: 14 }}>
               {data.map((slice) => (
                 <div key={slice.component}>
                   <div
                     style={{
                       fontFamily: "var(--font-sans)",
-                      fontSize: 10,
+                      fontSize: 12,
                       color: "var(--color-ink-muted)",
                       textTransform: "uppercase",
                       letterSpacing: "0.05em",
-                      marginBottom: 2,
+                      marginBottom: 3,
                     }}
                   >
                     {`Avg ${slice.component}`}
@@ -118,7 +118,7 @@ export default function CompMixChart({ data }: Props) {
                   <div
                     style={{
                       fontFamily: "var(--font-mono)",
-                      fontSize: 13,
+                      fontSize: 15,
                       color: "var(--color-ink)",
                       fontVariantNumeric: "tabular-nums",
                     }}

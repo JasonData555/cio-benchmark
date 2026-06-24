@@ -8,7 +8,6 @@ import {
   compBySize,
   compMix,
   formatCompPrecise,
-  functionsBreakdown,
   getCompDistribution,
 } from "@/lib/dataUtils";
 import {
@@ -22,7 +21,6 @@ import BoxPlotChart from "@/components/BoxPlotChart";
 import CompBySizeChart from "@/components/CompBySizeChart";
 import CompByIndustryChart from "@/components/CompByIndustryChart";
 import CompMixChart from "@/components/CompMixChart";
-import FunctionsChart from "@/components/FunctionsChart";
 import Footer from "@/components/Footer";
 
 const data = rawData as unknown as CIOData;
@@ -45,7 +43,6 @@ export default function Home() {
   const bySize = useMemo(() => compBySize(records), [records]);
   const byIndustry = useMemo(() => compByIndustry(records, 15, 1), [records]);
   const mix = useMemo(() => compMix(records), [records]);
-  const functions = useMemo(() => functionsBreakdown(records, 12), [records]);
 
   return (
     <div className="page-shell">
@@ -68,25 +65,22 @@ export default function Home() {
         <section className="stats-row">
           <StatCard label="Median Total Comp" value={formatCompPrecise(stats.median)} accent="blue" />
           <StatCard label="Mean Total Comp"   value={formatCompPrecise(stats.mean)} />
+          <StatCard label="25th Percentile"   value={formatCompPrecise(stats.p25)} />
           <StatCard label="90th Percentile"   value={formatCompPrecise(stats.p90)} />
-          <StatCard label="20th Percentile"   value={formatCompPrecise(stats.p20)} />
         </section>
 
         <section className="dashboard-grid">
-          <div className="area-box">
-            <BoxPlotChart data={stats} />
-          </div>
           <div className="area-mix">
             <CompMixChart data={mix} />
+          </div>
+          <div className="area-box">
+            <BoxPlotChart data={stats} />
           </div>
           <div className="area-size">
             <CompBySizeChart data={bySize} />
           </div>
           <div className="area-industry">
             <CompByIndustryChart data={byIndustry} />
-          </div>
-          <div className="area-functions">
-            <FunctionsChart data={functions} />
           </div>
         </section>
       </div>
