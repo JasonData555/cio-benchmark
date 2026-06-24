@@ -23,7 +23,8 @@ import Footer from "@/components/Footer";
 const EXCLUDED_STRUCTURES = new Set(["Government / Municipality", "Non-Profit"]);
 
 const data = rawData as unknown as CIOData;
-const allStructures = [...new Set(data.records.map((r) => r.companyStructure))]
+const BASE_RECORDS = data.records.filter((r) => !EXCLUDED_STRUCTURES.has(r.companyStructure));
+const allStructures = [...new Set(BASE_RECORDS.map((r) => r.companyStructure))]
   .filter((s) => Boolean(s) && !EXCLUDED_STRUCTURES.has(s))
   .sort();
 
@@ -31,7 +32,7 @@ export default function Home() {
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
 
   const records = useMemo(
-    () => applyFilterState(data.records, filters),
+    () => applyFilterState(BASE_RECORDS, filters),
     [filters]
   );
 
@@ -85,7 +86,7 @@ export default function Home() {
         source={data.meta.source}
         region={data.meta.region}
         year={data.meta.year}
-        n={data.meta.n}
+        n={BASE_RECORDS.length}
       />
     </div>
   );
