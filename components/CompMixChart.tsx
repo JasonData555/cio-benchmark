@@ -26,7 +26,7 @@ export default function CompMixChart({ data }: Props) {
       </header>
       <div
         className="panel-body"
-        style={{ display: "flex", flexDirection: "column" }}
+        style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}
       >
         {isEmpty ? (
           <div className="panel-empty">No data for current filters</div>
@@ -36,7 +36,7 @@ export default function CompMixChart({ data }: Props) {
             <div
               style={{
                 display: "flex",
-                height: 72,
+                height: 110,
                 borderRadius: 6,
                 overflow: "hidden",
                 width: "100%",

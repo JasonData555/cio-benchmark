@@ -136,6 +136,7 @@ export function percentileStats(values: number[]): PercentileStats {
 export interface SizeStat extends PercentileStats {
   sizeBand: string;
   label: string;
+  mean: number;
 }
 
 const SMALL_BANDS = new Set(["< 250 employees", "250 - 499 employees", "500 - 999 employees"]);
@@ -143,6 +144,9 @@ const SMALL_BANDS = new Set(["< 250 employees", "250 - 499 employees", "500 - 99
 // Total-comp percentile stats per company-size band, in logical order.
 // The three smallest bands (<250, 250-499, 500-999) are merged into "< 1,000".
 export function compBySize(records: CIORecord[]): SizeStat[] {
+  const avg = (vals: number[]) =>
+    vals.length > 0 ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+
   const smallVals = records
     .filter((r) => SMALL_BANDS.has(r.companySize))
     .map((r) => r.totalComp);
@@ -150,14 +154,14 @@ export function compBySize(records: CIORecord[]): SizeStat[] {
 
   const result: SizeStat[] = [];
   if (smallStat.n > 0) {
-    result.push({ sizeBand: "< 1,000 employees", label: "< 1,000", ...smallStat });
+    result.push({ sizeBand: "< 1,000 employees", label: "< 1,000", ...smallStat, mean: avg(smallVals) });
   }
 
   for (const band of SIZE_ORDER.slice(3)) {
     const vals = records.filter((r) => r.companySize === band).map((r) => r.totalComp);
     const stat = percentileStats(vals);
     if (stat.n > 0) {
-      result.push({ sizeBand: band, label: shortSize(band), ...stat });
+      result.push({ sizeBand: band, label: shortSize(band), ...stat, mean: avg(vals) });
     }
   }
 

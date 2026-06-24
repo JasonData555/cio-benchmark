@@ -91,7 +91,7 @@ function SizeTooltip({
           fontSize: 13,
         }}
       >
-        {formatCurrency(d.median)}
+        {formatCurrency(d.mean)}
       </div>
       <div
         style={{
@@ -112,13 +112,13 @@ export default function CompBySizeChart({ data }: Props) {
     <section className="panel">
       <header className="panel-head">
         <h2 className="panel-title">Compensation by Company Size</h2>
-        <span className="panel-sub">Median · USD</span>
+        <span className="panel-sub">Average · USD</span>
       </header>
       <div className="panel-body">
         {data.length === 0 ? (
           <div className="panel-empty">No data for current filters</div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
               layout="vertical"
@@ -138,13 +138,13 @@ export default function CompBySizeChart({ data }: Props) {
                 cursor={{ fill: "var(--color-surface)" }}
               />
               <Bar
-                dataKey="median"
+                dataKey="mean"
                 fill="var(--c2)"
                 radius={[0, 3, 3, 0]}
-                maxBarSize={20}
+                maxBarSize={28}
               >
                 <LabelList
-                  dataKey="median"
+                  dataKey="mean"
                   position="right"
                   formatter={(v) => formatCurrency(Number(v))}
                   style={{
