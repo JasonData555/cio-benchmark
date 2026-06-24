@@ -79,14 +79,19 @@ Formatters: `formatCompPrecise` ("$X.XXM"/"$XK"), `formatCurrency`, `formatPerce
 {
   "title","titleLevel","gender","location","city","region","tenure","prevCISO",
   "companySize","industry","companyStructure","reportsTo","currency",
-  "base","bonus","equity","totalComp","functions":["…"],"teamSize","boardFreq",
+  "base","bonus"/*number|null*/,"equity"/*number|null*/,"totalComp","functions":["…"],"teamSize","boardFreq",
   "company","sizeOrder"
 }
 ```
 
 ### Regenerating the data
 Run `node scripts/csv-to-json.mjs` to rebuild `cio_data.json` from `CIO-Comp-Data-final.csv`.
-Includes only rows where `Role_Bucket === "CIO"` and `totalComp > 0` (139 records).
+Inclusion rule: **`totalComp > 0`** (no `Role_Bucket` filter). The dataset is the CIO
+population including dual "CIO / CISO" title-holders that the CSV tags `Role_Bucket=CISO`;
+filtering on `Role_Bucket` would wrongly drop them and break the per-structure averages.
+`bonus` and `equity` are stored as `number | null` — a **blank** cell becomes `null` and is
+excluded from averages (Excel `AVERAGE` semantics, where blank ≠ $0). The script's validation
+asserts per-structure base/bonus/equity averages against the client's source-of-truth targets.
 
 ## CSS design tokens (globals.css)
 Colors: `--color-bg` `--color-surface` `--color-blue` (#185fa5) `--color-blue-mid`

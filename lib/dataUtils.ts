@@ -19,8 +19,8 @@ export interface CIORecord {
   reportsTo: string;
   currency: string;
   base: number;
-  bonus: number;
-  equity: number;
+  bonus: number | null; // null = blank cell (excluded from averages, Excel AVERAGE semantics)
+  equity: number | null; // null = blank cell
   totalComp: number;
   functions: string[];
   teamSize: number;
@@ -196,6 +196,13 @@ export interface MixSlice {
   pct: number;
 }
 
+// Mean of a component across records, ignoring null (blank) cells — matches
+// Excel AVERAGE semantics (blank excluded from the denominator, $0 included).
+function excelAvg(values: Array<number | null>): number {
+  const filled = values.filter((v): v is number => v != null);
+  return filled.length > 0 ? filled.reduce((s, v) => s + v, 0) / filled.length : 0;
+}
+
 // Average pay mix across records: base / bonus / equity as a % of total.
 export function compMix(records: CIORecord[]): MixSlice[] {
   if (records.length === 0) {
@@ -205,11 +212,9 @@ export function compMix(records: CIORecord[]): MixSlice[] {
       { component: "Equity", value: 0, pct: 0 },
     ];
   }
-  const avg = (key: keyof CIORecord) =>
-    records.reduce((s, r) => s + (r[key] as number), 0) / records.length;
-  const base = avg("base");
-  const bonus = avg("bonus");
-  const equity = avg("equity");
+  const base = excelAvg(records.map((r) => r.base));
+  const bonus = excelAvg(records.map((r) => r.bonus));
+  const equity = excelAvg(records.map((r) => r.equity));
   const total = base + bonus + equity || 1;
   return [
     { component: "Base", value: base, pct: (base / total) * 100 },
@@ -355,11 +360,9 @@ export interface CompMixResult {
 // Average pay mix: mean of each component as a % of mean total comp.
 export function getCompMix(data: CIORecord[]): CompMixResult {
   if (data.length === 0) return { base: 0, bonus: 0, equity: 0 };
-  const avg = (key: "base" | "bonus" | "equity") =>
-    data.reduce((s, r) => s + r[key], 0) / data.length;
-  const base = avg("base");
-  const bonus = avg("bonus");
-  const equity = avg("equity");
+  const base = excelAvg(data.map((r) => r.base));
+  const bonus = excelAvg(data.map((r) => r.bonus));
+  const equity = excelAvg(data.map((r) => r.equity));
   const total = base + bonus + equity || 1;
   return {
     base: (base / total) * 100,

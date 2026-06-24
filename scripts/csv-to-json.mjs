@@ -1,7 +1,9 @@
 /**
  * Converts CIO-Comp-Data-final.csv → data/cio_data.json
  *
- * Inclusion rule: Role_Bucket === "CIO" && totalComp > 0
+ * Inclusion rule: totalComp > 0 (no Role_Bucket filter — the dataset is the
+ * CIO population, incl. dual "CIO / CISO" title-holders tagged Role_Bucket=CISO).
+ * bonus/equity preserve blank cells as null so Excel AVERAGE semantics hold.
  * Run: node scripts/csv-to-json.mjs
  */
 
@@ -80,11 +82,18 @@ function parseCSV(text) {
   return rows;
 }
 
+// Parse a money cell. A blank/empty cell returns null so the blank-vs-$0
+// distinction survives into the JSON (Excel AVERAGE ignores blanks). Use
+// parseMoneyOr0 where a numeric is always required (base, totalComp).
 function parseMoney(s) {
-  const cleaned = s.replace(/[$,]/g, "").trim();
-  if (!cleaned) return 0;
+  const cleaned = (s ?? "").replace(/[$,]/g, "").trim();
+  if (!cleaned) return null;
   const n = parseFloat(cleaned);
-  return isNaN(n) ? 0 : n;
+  return isNaN(n) ? null : n;
+}
+
+function parseMoneyOr0(s) {
+  return parseMoney(s) ?? 0;
 }
 
 function sizeOrder(band) {
@@ -139,10 +148,13 @@ const C = {
 const records = [];
 
 for (const row of dataRows) {
-  const roleBucket = row[C.roleBucket]?.trim();
-  const totalComp = parseMoney(row[C.totalComp]);
+  const totalComp = parseMoneyOr0(row[C.totalComp]);
 
-  if (roleBucket !== "CIO" || totalComp <= 0) continue;
+  // Inclusion rule: any survey row with positive total comp. The dataset is
+  // the CIO population (incl. dual "CIO / CISO" title-holders tagged
+  // Role_Bucket=CISO), so we intentionally do NOT filter on Role_Bucket —
+  // that matches the client's source-of-truth per-structure averages.
+  if (totalComp <= 0) continue;
 
   const rawFunctions = row[C.functions]?.trim() ?? "";
   const functions = rawFunctions
@@ -168,9 +180,9 @@ for (const row of dataRows) {
     companyStructure: row[C.companyStructure]?.trim() ?? "",
     reportsTo: row[C.reportsTo]?.trim() ?? "",
     currency: row[C.currency]?.trim() ?? "",
-    base: parseMoney(row[C.base]),
-    bonus: parseMoney(row[C.bonus]),
-    equity: parseMoney(row[C.equity]),
+    base: parseMoneyOr0(row[C.base]),
+    bonus: parseMoney(row[C.bonus]),   // null when the cell is blank
+    equity: parseMoney(row[C.equity]), // null when the cell is blank
     totalComp,
     functions,
     teamSize: parseFloat(row[C.teamSize]) || 0,
@@ -180,24 +192,58 @@ for (const row of dataRows) {
 }
 
 // ---------------------------------------------------------------------------
-// Validation
+// Validation — per-structure Excel AVERAGE (sum ÷ count of non-null cells),
+// grouped by Company Structure with no Role_Bucket filter. Must match the
+// client's source-of-truth pivot to the dollar.
 // ---------------------------------------------------------------------------
-const pub_priv = new Set(["Publicly Traded Company", "Privately Held Company"]);
-const ppVals = records
-  .filter((r) => pub_priv.has(r.companyStructure) && r.totalComp > 0)
-  .map((r) => r.totalComp);
-const ppMean = ppVals.reduce((s, v) => s + v, 0) / ppVals.length;
-const allMean =
-  records.reduce((s, r) => s + r.totalComp, 0) / records.length;
+const TARGETS = {
+  "Privately Held Company": { base: 370785, bonus: 137368, equity: 825434 },
+  "Publicly Traded Company": { base: 427836, bonus: 112774, equity: 1144506 },
+};
+
+const excelAvg = (vals) => {
+  const filled = vals.filter((v) => v != null);
+  return filled.length ? filled.reduce((s, v) => s + v, 0) / filled.length : 0;
+};
 
 console.log(`Records included : ${records.length}`);
-console.log(`Overall mean     : $${Math.round(allMean).toLocaleString()}`);
-console.log(
-  `Pub+Priv n       : ${ppVals.length}`
-);
-console.log(
-  `Pub+Priv mean    : $${Math.round(ppMean).toLocaleString()} (target ≈ $1,720,667)`
-);
+
+// Per-row integrity: base + bonus + equity must reconcile to totalComp. Catches
+// any transcription / column-shift error in the money columns.
+let checksumBad = 0;
+for (const r of records) {
+  const sum = r.base + (r.bonus ?? 0) + (r.equity ?? 0);
+  if (Math.abs(sum - r.totalComp) > 1) {
+    checksumBad++;
+    if (checksumBad <= 10) {
+      console.log(
+        `  CHECKSUM: ${r.companyStructure} base=${r.base} bonus=${r.bonus} ` +
+          `equity=${r.equity} sum=${sum} total=${r.totalComp}`
+      );
+    }
+  }
+}
+console.log(`Checksum mismatches: ${checksumBad}\n`);
+
+let failed = checksumBad > 0;
+for (const [structure, target] of Object.entries(TARGETS)) {
+  const group = records.filter((r) => r.companyStructure === structure);
+  const got = {
+    base: excelAvg(group.map((r) => r.base)),
+    bonus: excelAvg(group.map((r) => r.bonus)),
+    equity: excelAvg(group.map((r) => r.equity)),
+  };
+  console.log(`${structure} (n=${group.length})`);
+  for (const key of ["base", "bonus", "equity"]) {
+    const ok = Math.abs(Math.round(got[key]) - target[key]) <= 1;
+    if (!ok) failed = true;
+    console.log(
+      `  ${key.padEnd(6)} $${Math.round(got[key]).toLocaleString().padStart(11)}` +
+        `  target $${target[key].toLocaleString().padStart(11)}  ${ok ? "OK" : "MISMATCH"}`
+    );
+  }
+}
+console.log(`\nValidation: ${failed ? "FAILED — values do not match targets" : "PASSED"}`);
 
 // ---------------------------------------------------------------------------
 // Write output
