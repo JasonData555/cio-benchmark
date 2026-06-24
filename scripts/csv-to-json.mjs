@@ -1,5 +1,5 @@
 /**
- * Converts CIO-Comp-Data-Revised.csv → data/cio_data.json
+ * Converts CIO-Comp-Data-final.csv → data/cio_data.json
  *
  * Inclusion rule: Role_Bucket === "CIO" && totalComp > 0
  * Run: node scripts/csv-to-json.mjs
@@ -12,7 +12,7 @@ import { fileURLToPath } from "url";
 const __dir = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(__dir, "..");
 
-const CSV_PATH = resolve(ROOT, "CIO-Comp-Data-Revised.csv");
+const CSV_PATH = resolve(ROOT, "CIO-Comp-Data-final.csv");
 const OUT_PATH = resolve(ROOT, "data", "cio_data.json");
 
 const SIZE_ORDER = [
