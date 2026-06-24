@@ -92,6 +92,10 @@ function sizeOrder(band) {
   return idx === -1 ? 0 : idx + 1;
 }
 
+const INDUSTRY_ALIASES = {
+  "Financial Services": "Banking / Financial Services",
+};
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -146,6 +150,8 @@ for (const row of dataRows) {
     : [];
 
   const companySize = row[C.companySize]?.trim() ?? "";
+  const rawIndustry = row[C.industry]?.trim() ?? "";
+  const industry = INDUSTRY_ALIASES[rawIndustry] ?? rawIndustry;
 
   records.push({
     title: row[C.title]?.trim() ?? "",
@@ -158,7 +164,7 @@ for (const row of dataRows) {
     prevCISO: row[C.prevCISO]?.trim() ?? "",
     companySize,
     sizeOrder: sizeOrder(companySize),
-    industry: row[C.industry]?.trim() ?? "",
+    industry,
     companyStructure: row[C.companyStructure]?.trim() ?? "",
     reportsTo: row[C.reportsTo]?.trim() ?? "",
     currency: row[C.currency]?.trim() ?? "",
