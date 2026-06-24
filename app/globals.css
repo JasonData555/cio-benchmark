@@ -552,7 +552,7 @@ h1,
   grid-template-rows: 1fr 1fr;
   grid-template-areas:
     "mix box"
-    "size industry";
+    "size size";
   gap: 12px;
   padding: 0 1.25rem 0.75rem;
   min-height: 0;
@@ -560,7 +560,6 @@ h1,
 }
 
 .area-box { grid-area: box; min-height: 0; }
-.area-industry { grid-area: industry; min-height: 0; }
 .area-size { grid-area: size; min-height: 0; }
 .area-mix { grid-area: mix; min-height: 0; }
 

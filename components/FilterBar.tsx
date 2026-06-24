@@ -13,7 +13,6 @@ interface FilterBarProps {
   filters: FilterState;
   onChange: (filters: FilterState) => void;
   counts: { total: number };
-  industries: string[];
   structures: string[];
 }
 
@@ -35,28 +34,15 @@ export default function FilterBar({
   filters,
   onChange,
   counts,
-  industries,
   structures,
 }: FilterBarProps) {
   const [openSections, setOpenSections] = useState({
-    industry: true,
     structure: false,
     size: false,
   });
 
   const toggleSection = (key: keyof typeof openSections) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const toggleIndustry = (industry: string) => {
-    if (industry === "All") {
-      onChange({ ...filters, industries: [] });
-      return;
-    }
-    const next = filters.industries.includes(industry)
-      ? filters.industries.filter((i) => i !== industry)
-      : [...filters.industries, industry];
-    onChange({ ...filters, industries: next });
   };
 
   const setSizeMin = (v: number) => {
@@ -82,7 +68,6 @@ export default function FilterBar({
       ? "All sizes"
       : `${SIZE_LABELS[filters.sizeMin]} – ${SIZE_LABELS[filters.sizeMax]}`;
 
-  const industryCount = filters.industries.length;
   const hasActiveFilters = !isDefaultState(filters);
 
   return (
@@ -101,65 +86,6 @@ export default function FilterBar({
           Reset all filters
         </button>
       )}
-
-      {/* Industry */}
-      <div className="sidebar-section">
-        <button
-          className="sidebar-section-trigger"
-          onClick={() => toggleSection("industry")}
-        >
-          <span className="sidebar-section-title">
-            Industry
-            {industryCount > 0 && (
-              <span className="sidebar-badge">{industryCount}</span>
-            )}
-          </span>
-          <span className="sidebar-chevron">
-            <ChevronIcon open={openSections.industry} />
-          </span>
-        </button>
-
-        {openSections.industry && (
-          <div className="sidebar-section-body">
-            <div className="sidebar-check-list">
-              {/* "All" row */}
-              <div
-                className={`sidebar-check-item ${filters.industries.length === 0 ? "sidebar-check-item--active" : ""}`}
-                onClick={() => toggleIndustry("All")}
-              >
-                <span className={`sidebar-check-box ${filters.industries.length === 0 ? "sidebar-check-box--checked" : ""}`}>
-                  {filters.industries.length === 0 && (
-                    <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                      <path d="M1.5 4L3.2 5.7L6.5 2.3" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </span>
-                <span className="sidebar-check-label">All Industries</span>
-              </div>
-
-              {industries.map((ind) => {
-                const active = filters.industries.includes(ind);
-                return (
-                  <div
-                    key={ind}
-                    className={`sidebar-check-item ${active ? "sidebar-check-item--active" : ""}`}
-                    onClick={() => toggleIndustry(ind)}
-                  >
-                    <span className={`sidebar-check-box ${active ? "sidebar-check-box--checked" : ""}`}>
-                      {active && (
-                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                          <path d="M1.5 4L3.2 5.7L6.5 2.3" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      )}
-                    </span>
-                    <span className="sidebar-check-label">{ind}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* Company Structure */}
       <div className="sidebar-section">

@@ -6,7 +6,6 @@ import { CIORecord, SIZE_ORDER } from "./dataUtils";
 // ---- New FilterState (pill/slider/dropdown UI) ----
 
 export interface FilterState {
-  industries: string[]; // empty = All industries
   structure: string;    // "All" or a companyStructure value
   sizeMin: number;      // 1–7 (1-based index into SIZE_ORDER)
   sizeMax: number;      // 1–7
@@ -25,7 +24,6 @@ export const SIZE_LABELS: Record<number, string> = {
 export const SIZE_MAX = SIZE_ORDER.length; // 7
 
 export const defaultFilterState: FilterState = {
-  industries: [],
   structure: "All",
   sizeMin: 1,
   sizeMax: SIZE_MAX,
@@ -33,7 +31,6 @@ export const defaultFilterState: FilterState = {
 
 export function isDefaultState(fs: FilterState): boolean {
   return (
-    fs.industries.length === 0 &&
     fs.structure === "All" &&
     fs.sizeMin === 1 &&
     fs.sizeMax === SIZE_MAX
@@ -42,7 +39,6 @@ export function isDefaultState(fs: FilterState): boolean {
 
 export function applyFilterState(records: CIORecord[], fs: FilterState): CIORecord[] {
   return records.filter((r) => {
-    if (fs.industries.length > 0 && !fs.industries.includes(r.industry)) return false;
     if (fs.structure !== "All" && r.companyStructure !== fs.structure) return false;
     const idx = SIZE_ORDER.indexOf(r.companySize) + 1; // 1-based; 0 if not found
     if (idx > 0 && (idx < fs.sizeMin || idx > fs.sizeMax)) return false;

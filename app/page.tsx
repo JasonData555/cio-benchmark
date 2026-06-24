@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import rawData from "@/data/cio_data.json";
 import {
   CIOData,
-  compByIndustry,
   compBySize,
   compMix,
   formatCompPrecise,
@@ -19,12 +18,10 @@ import FilterBar from "@/components/FilterBar";
 import StatCard from "@/components/StatCard";
 import BoxPlotChart from "@/components/BoxPlotChart";
 import CompBySizeChart from "@/components/CompBySizeChart";
-import CompByIndustryChart from "@/components/CompByIndustryChart";
 import CompMixChart from "@/components/CompMixChart";
 import Footer from "@/components/Footer";
 
 const data = rawData as unknown as CIOData;
-const allIndustries = [...new Set(data.records.map((r) => r.industry))].filter(Boolean).sort();
 const allStructures = [...new Set(data.records.map((r) => r.companyStructure))].filter(Boolean).sort();
 
 export default function Home() {
@@ -41,7 +38,6 @@ export default function Home() {
   }), [records]);
 
   const bySize = useMemo(() => compBySize(records), [records]);
-  const byIndustry = useMemo(() => compByIndustry(records, 15, 1), [records]);
   const mix = useMemo(() => compMix(records), [records]);
 
   return (
@@ -57,7 +53,6 @@ export default function Home() {
         filters={filters}
         onChange={setFilters}
         counts={{ total: stats.n }}
-        industries={allIndustries}
         structures={allStructures}
       />
 
@@ -78,9 +73,6 @@ export default function Home() {
           </div>
           <div className="area-size">
             <CompBySizeChart data={bySize} />
-          </div>
-          <div className="area-industry">
-            <CompByIndustryChart data={byIndustry} />
           </div>
         </section>
       </div>
