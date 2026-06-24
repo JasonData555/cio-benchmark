@@ -4,18 +4,19 @@ import {
   Bar,
   BarChart,
   LabelList,
+  ReferenceLine,
   ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
-import { SizeStat, formatCurrency } from "@/lib/dataUtils";
+import { SizeStat, formatCompPrecise, formatCurrency } from "@/lib/dataUtils";
 
 interface Props {
   data: SizeStat[];
 }
 
-function SizeTick({
+function SizeXTick({
   x,
   y,
   payload,
@@ -30,23 +31,24 @@ function SizeTick({
   return (
     <g transform={`translate(${x},${y})`}>
       <text
-        x={-4}
-        textAnchor="end"
+        x={0}
+        dy={14}
+        textAnchor="middle"
         fill="var(--color-ink)"
-        fontSize={13}
+        fontSize={12}
         fontFamily="var(--font-sans)"
-        dy="-3"
+        fontWeight={500}
       >
         {payload?.value}
       </text>
       {entry && (
         <text
-          x={-4}
-          textAnchor="end"
+          x={0}
+          dy={28}
+          textAnchor="middle"
           fill="var(--color-ink-muted)"
-          fontSize={11}
+          fontSize={10}
           fontFamily="var(--font-sans)"
-          dy="9"
         >
           {`n=${entry.n}`}
         </text>
@@ -108,6 +110,12 @@ function SizeTooltip({
 }
 
 export default function CompBySizeChart({ data }: Props) {
+  const weightedMean =
+    data.length > 0
+      ? data.reduce((s, d) => s + d.mean * d.n, 0) /
+        data.reduce((s, d) => s + d.n, 0)
+      : 0;
+
   return (
     <section className="panel">
       <header className="panel-head">
@@ -121,35 +129,51 @@ export default function CompBySizeChart({ data }: Props) {
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={data}
-              layout="vertical"
-              margin={{ top: 2, right: 60, left: 8, bottom: 2 }}
+              margin={{ top: 30, right: 16, left: 10, bottom: 48 }}
             >
-              <XAxis type="number" hide domain={[0, "dataMax"]} />
-              <YAxis
-                type="category"
+              <XAxis
                 dataKey="label"
-                width={80}
-                tick={<SizeTick data={data} />}
                 tickLine={false}
                 axisLine={false}
+                tick={<SizeXTick data={data} />}
+                interval={0}
+              />
+              <YAxis
+                hide
+                domain={[0, (dataMax: number) => dataMax * 1.22]}
               />
               <Tooltip
                 content={<SizeTooltip />}
                 cursor={{ fill: "var(--color-surface)" }}
               />
+              <ReferenceLine
+                y={weightedMean}
+                stroke="var(--color-amber)"
+                strokeDasharray="4 3"
+                strokeWidth={1.5}
+                label={{
+                  value: `Avg ${formatCompPrecise(weightedMean)}`,
+                  position: "insideBottomLeft",
+                  fontSize: 10,
+                  fontFamily: "var(--font-mono)",
+                  fill: "var(--color-amber)",
+                  dx: 8,
+                  dy: -4,
+                }}
+              />
               <Bar
                 dataKey="mean"
                 fill="var(--c2)"
-                radius={[0, 3, 3, 0]}
-                maxBarSize={28}
+                radius={[3, 3, 0, 0]}
+                maxBarSize={56}
               >
                 <LabelList
                   dataKey="mean"
-                  position="right"
-                  formatter={(v) => formatCurrency(Number(v))}
+                  position="top"
+                  formatter={(v: unknown) => formatCompPrecise(Number(v))}
                   style={{
                     fill: "var(--color-ink)",
-                    fontSize: 13,
+                    fontSize: 12,
                     fontFamily: "var(--font-mono)",
                     fontWeight: 600,
                   }}
