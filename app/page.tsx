@@ -16,13 +16,16 @@ import {
 } from "@/lib/filters";
 import FilterBar from "@/components/FilterBar";
 import StatCard from "@/components/StatCard";
-import BoxPlotChart from "@/components/BoxPlotChart";
 import CompBySizeChart from "@/components/CompBySizeChart";
 import CompMixChart from "@/components/CompMixChart";
 import Footer from "@/components/Footer";
 
+const EXCLUDED_STRUCTURES = new Set(["Government / Municipality", "Non-Profit"]);
+
 const data = rawData as unknown as CIOData;
-const allStructures = [...new Set(data.records.map((r) => r.companyStructure))].filter(Boolean).sort();
+const allStructures = [...new Set(data.records.map((r) => r.companyStructure))]
+  .filter((s) => Boolean(s) && !EXCLUDED_STRUCTURES.has(s))
+  .sort();
 
 export default function Home() {
   const [filters, setFilters] = useState<FilterState>(defaultFilterState);
@@ -68,9 +71,6 @@ export default function Home() {
           <div className="area-mix">
             <CompMixChart data={mix} />
           </div>
-          <div className="area-box">
-            <BoxPlotChart data={stats} />
-          </div>
           <div className="area-size">
             <CompBySizeChart data={bySize} />
           </div>
@@ -82,6 +82,7 @@ export default function Home() {
         region={data.meta.region}
         year={data.meta.year}
         n={data.meta.n}
+        footnote="Peer Group includes: Informatica, Asana, Black Duck, BlackLine, Coursera, Freshworks, Twitch, Zscaler, Five9, PagerDuty, Bill.com, MongoDB, Mozilla, Guidewire Software, Samsara, and Zuora"
       />
     </div>
   );

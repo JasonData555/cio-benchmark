@@ -138,15 +138,30 @@ export interface SizeStat extends PercentileStats {
   label: string;
 }
 
+const SMALL_BANDS = new Set(["< 250 employees", "250 - 499 employees", "500 - 999 employees"]);
+
 // Total-comp percentile stats per company-size band, in logical order.
-// Used by both the box-plot and the comp-by-size bar chart.
+// The three smallest bands (<250, 250-499, 500-999) are merged into "< 1,000".
 export function compBySize(records: CIORecord[]): SizeStat[] {
-  return SIZE_ORDER.map((band) => {
-    const vals = records
-      .filter((r) => r.companySize === band)
-      .map((r) => r.totalComp);
-    return { sizeBand: band, label: shortSize(band), ...percentileStats(vals) };
-  }).filter((s) => s.n > 0);
+  const smallVals = records
+    .filter((r) => SMALL_BANDS.has(r.companySize))
+    .map((r) => r.totalComp);
+  const smallStat = percentileStats(smallVals);
+
+  const result: SizeStat[] = [];
+  if (smallStat.n > 0) {
+    result.push({ sizeBand: "< 1,000 employees", label: "< 1,000", ...smallStat });
+  }
+
+  for (const band of SIZE_ORDER.slice(3)) {
+    const vals = records.filter((r) => r.companySize === band).map((r) => r.totalComp);
+    const stat = percentileStats(vals);
+    if (stat.n > 0) {
+      result.push({ sizeBand: band, label: shortSize(band), ...stat });
+    }
+  }
+
+  return result;
 }
 
 export interface IndustryStat {

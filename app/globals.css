@@ -148,7 +148,7 @@ h1,
 .page-shell {
   display: grid;
   grid-template-columns: 240px 1fr;
-  grid-template-rows: 56px 1fr 32px;
+  grid-template-rows: 56px 1fr 50px;
   grid-template-areas:
     "header  header"
     "sidebar main"
@@ -549,17 +549,14 @@ h1,
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
-  grid-template-areas:
-    "mix box"
-    "size size";
+  grid-template-rows: 1fr;
+  grid-template-areas: "mix size";
   gap: 12px;
   padding: 0 1.25rem 0.75rem;
   min-height: 0;
   flex: 1;
 }
 
-.area-box { grid-area: box; min-height: 0; }
 .area-size { grid-area: size; min-height: 0; }
 .area-mix { grid-area: mix; min-height: 0; }
 
@@ -627,13 +624,20 @@ h1,
 .footer {
   grid-area: footer;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 3px;
   border-top: 0.5px solid var(--color-border);
   font-family: var(--font-sans);
   font-weight: 400;
   font-size: 10px;
   color: var(--color-ink-muted);
+}
+
+.footer-footnote {
+  color: var(--color-ink-secondary);
+  font-size: 10px;
 }
 
 /* ---------- recharts: numeric data labels in mono ---------- */
