@@ -8,9 +8,9 @@ interface Props {
 }
 
 const SEGMENTS = [
-  { fill: "var(--c1)" }, /* Base   — champagne */
-  { fill: "var(--c3)" }, /* Bonus  — champagne-mid */
-  { fill: "var(--c5)" }, /* Equity — cobalt */
+  { fill: "var(--c1)", text: "#f7f9fc" }, /* Base   — dark blue  → light text */
+  { fill: "var(--c3)", text: "#0d1b2e" }, /* Bonus  — light blue → dark text  */
+  { fill: "var(--c5)", text: "#0d1b2e" }, /* Equity — gray       → dark text  */
 ];
 
 export default function CompMixChart({ data }: Props) {
@@ -77,7 +77,7 @@ export default function CompMixChart({ data }: Props) {
                     {slice.pct > 8 && (
                       <span
                         style={{
-                          color: i === 2 ? "#f7f9fc" : "#0d1b2e",
+                          color: SEGMENTS[i].text,
                           fontSize: 15,
                           fontFamily: "var(--font-mono)",
                           fontWeight: 500,

@@ -47,11 +47,11 @@
   --border: var(--color-border);
   --panel: var(--color-surface);
   --accent: var(--color-champagne);
-  --c1: var(--color-champagne);   /* mix "Base" / primary bars */
+  --c1: #1b4f82;                  /* mix "Base"   — darker complementary blue */
   --c2: var(--color-champagne);   /* comp-by-size bars (primary data) */
-  --c3: var(--color-amber-mid);   /* mix "Bonus" (champagne-mid) */
+  --c3: #6aa4d8;                  /* mix "Bonus"  — lighter complementary blue */
   --c4: var(--color-blue-light);  /* box IQR fill */
-  --c5: var(--color-blue);        /* mix "Equity" -> cobalt accent */
+  --c5: #8b94a3;                  /* mix "Equity" — complementary cool gray */
 }
 
 /*
