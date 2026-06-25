@@ -1,9 +1,8 @@
 # CLAUDE.md — CIO Benchmark Dashboard
 
-## What this is
-A single-page, no-scroll, desktop-first data dashboard visualizing **CIO compensation
-and governance** for North America, from a proprietary **Hitch Partners** survey.
-Client-facing intelligence product: clean, credible, chart-led, minimal copy.
+A single-page, no-scroll, desktop-first dashboard visualizing **CIO compensation and
+governance** for North America from a proprietary **Hitch Partners** survey. Client-facing
+intelligence product: clean, credible, chart-led, minimal copy.
 
 ## Stack & constraints
 - **Next.js 14 (App Router)**, React 18, TypeScript.
@@ -51,14 +50,13 @@ public/
 `body { overflow: hidden }` — everything must fit one viewport.
 
 ## Data flow
-**Charts:** `data/cio_data.json` → `applyFilterState(records, filterState)` (`lib/filters.ts`)
-→ aggregators in `lib/dataUtils.ts` → chart components, all client-side in `Dashboard.tsx`.
-**Charts receive already-filtered, pre-aggregated arrays** — keep it that way.
+**Charts:** `data/cio_data.json` → `applyFilterState` (`lib/filters.ts`) → aggregators in
+`lib/dataUtils.ts` → chart components, all client-side in `Dashboard.tsx`. **Charts receive
+already-filtered, pre-aggregated arrays** — keep it that way.
 
-**StatCards:** the four KPI values are computed **server-side** (pre-formatted strings):
-`page.tsx` renders initial via `buildStatCards(defaultFilterState)`; `Dashboard.tsx` calls the
-`getStatCards` server action on filter change. Override logic lives only in server-only
-`lib/statCards.ts`, never shipping to the client. **Three values are pinned for the headline
+**StatCards:** the four KPI values are computed **server-side** (pre-formatted strings) in
+server-only `lib/statCards.ts` — `page.tsx` renders the initial set, `Dashboard.tsx` calls the
+`getStatCards` server action on filter change. **Three values are pinned for the headline
 (full size range) view** — All: Mean $1.51M, P25 $1.21M; Publicly Traded: P25 $1.35M; narrowing
 the size slider shows real computed values.
 
@@ -70,19 +68,16 @@ interface FilterState {
   sizeMax: number;
 }
 ```
-Key exports: `applyFilterState`, `isDefaultState`, `SIZE_LABELS`, `defaultFilterState`
-
-Government / Municipality and Non-Profit are excluded from `BASE_RECORDS` (in `Dashboard.tsx`
+Key exports: `applyFilterState`, `isDefaultState`, `SIZE_LABELS`, `defaultFilterState`.
+Government/Municipality and Non-Profit are excluded from `BASE_RECORDS` (in `Dashboard.tsx`
 + `lib/statCards.ts`) and from the structure dropdown.
 
 ### Key types & functions (lib/dataUtils.ts)
-Types: `CIORecord`, `CIOData`, `PercentileStats`, `SizeStat`, `MixSlice`
-
+Types: `CIORecord`, `CIOData`, `PercentileStats`, `SizeStat`, `MixSlice`.
 Active aggregators: `compBySize`, `compMix` (used by `Dashboard.tsx`), `getCompDistribution`
-(returns `{ median, mean, p25, p90 }`; used by `lib/statCards.ts` server-side). `compMix`
-averages base/bonus/equity ignoring `null` (Excel semantics) via the `excelAvg` helper.
-dataUtils also has a parallel `get*`-prefixed data-layer API + its own `FilterState`; it is
-**not** wired into the app (the app uses `lib/filters.ts`).
+(`{ median, mean, p25, p90 }`; used by `lib/statCards.ts`). `compMix` averages base/bonus/equity
+ignoring `null` (Excel semantics) via `excelAvg`. dataUtils' parallel `get*`-prefixed API + its
+own `FilterState` are **not** wired into the app (the app uses `lib/filters.ts`).
 
 Formatters: `formatCompPrecise` ("$X.XXM"/"$XK"), `formatCurrency`, `formatPercent`, `shortSize`.
 
@@ -97,38 +92,33 @@ Formatters: `formatCompPrecise` ("$X.XXM"/"$XK"), `formatCurrency`, `formatPerce
 
 ### Regenerating the data
 Run `node scripts/csv-to-json.mjs` to rebuild `cio_data.json` from `CIO-Comp-Data-final.csv`.
-Inclusion rule: **`totalComp > 0`** (no `Role_Bucket` filter). The dataset is the CIO
-population including dual "CIO / CISO" title-holders that the CSV tags `Role_Bucket=CISO`;
-filtering on `Role_Bucket` would wrongly drop them and break the per-structure averages.
-`bonus` and `equity` are stored as `number | null` — a **blank** cell becomes `null` and is
-excluded from averages (Excel `AVERAGE` semantics, where blank ≠ $0). The script prints a
-per-row checksum (base+bonus+equity == totalComp) and asserts per-structure averages against
-the client source-of-truth targets — it must print `Validation: PASSED`.
+Inclusion rule: **`totalComp > 0`** (do **not** filter on `Role_Bucket` — that drops dual
+"CIO / CISO" holders and breaks per-structure averages). `bonus`/`equity` are `number | null`:
+a blank cell → `null`, excluded from averages (Excel `AVERAGE` semantics, blank ≠ $0). The
+script checksums each row and asserts per-structure averages — it must print `Validation: PASSED`.
 
-**Current state:** 144 records total; 121 after excluding Gov/Non-Profit (the dashboard
-default `n`). Per-structure avg base/bonus/equity (the validated ground truth):
-- Privately Held Company (n=62): $370,785 / $137,368 / $825,434
-- Publicly Traded Company (n=59): $427,836 / $112,774 / $1,144,506
+**Current state:** 144 records total; 121 after excluding Gov/Non-Profit (default `n`).
+Validated avg base/bonus/equity: Privately Held (n=62) $370,785 / $137,368 / $825,434;
+Publicly Traded (n=59) $427,836 / $112,774 / $1,144,506.
 
-**Data provenance:** `CIO-Comp-Data-final.csv` was reconstructed verbatim from the client's
-corrected paste; comp columns are checksum-verified, but non-comp free-text columns (functions
-list, AI-survey answers) are placeholders — re-import the true master CSV if enabling the
-unrendered charts.
+**Provenance:** comp columns are checksum-verified; non-comp free-text columns (functions,
+AI-survey answers) are placeholders — re-import the true master CSV if enabling unrendered charts.
 
 ## CSS design tokens (globals.css)
-Colors: `--color-bg` `--color-surface` `--color-blue` (#185fa5) `--color-blue-mid`
+Colors: `--color-bg` `--color-surface` `--color-blue` `--color-blue-mid`
 `--color-amber` `--color-amber-mid` `--color-champagne` `--color-ink*` (4 levels)
-Chart palette: `--c1` (blue) `--c2` (blue-mid) `--c3` (amber-mid) `--c4` (IQR fill) `--c5` (champagne)
+Chart palette: `--c1` dark blue / `--c3` light blue / `--c5` cool gray are **CompMix-only**
+(Base/Bonus/Equity; per-segment label text colors live in `CompMixChart.tsx` `SEGMENTS`);
+`--c2` champagne = CompBySize bars; `--c4` = box IQR fill.
 Type: `--font-display` (Cormorant Garamond) `--font-sans` (DM Sans) `--font-mono` (IBM Plex Mono)
 Spacing: `--gap: 14px` `--radius: 10px`
 
 ## Conventions
 - Anything using hooks/state/recharts must be `"use client"`.
 - Filter option lists are **derived from data**, never hardcoded.
-- Chart colors use `var(--cN)` CSS variables — palette changes go in `globals.css` only.
-- StatCard values are server-computed — never compute or expose them client-side.
+- Chart colors use `var(--cN)` vars — palette changes go in `globals.css` only.
+- StatCard values are server-computed — never expose them client-side.
 - `BoxPlotChart` uses `ResizeObserver` (not `ResponsiveContainer`) — keep if re-enabled.
 
 ## Commands
-- `npm run dev` — local dev at http://localhost:3000 · `npm run build` — production build
-- `npm run lint` — ESLint · `npm start` — serve production build
+`npm run dev` (localhost:3000) · `npm run build` · `npm run lint` · `npm start`

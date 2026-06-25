@@ -678,7 +678,7 @@ h1,
 
 .mix-kpi-value {
   font-family: var(--font-display);
-  font-size: 3rem;
+  font-size: 34px;
   font-weight: 600;
   color: var(--color-ink);
   line-height: 1;
