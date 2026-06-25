@@ -69,11 +69,12 @@ function SizeTooltip({
   return (
     <div
       style={{
-        background: "#fff",
+        background: "var(--color-surface)",
         border: "0.5px solid var(--color-border)",
         borderRadius: 6,
         padding: "8px 12px",
         fontSize: 12,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.40)",
       }}
     >
       <div
@@ -89,7 +90,7 @@ function SizeTooltip({
       <div
         style={{
           fontFamily: "var(--font-mono)",
-          color: "var(--color-blue)",
+          color: "var(--color-champagne)",
           fontSize: 13,
         }}
       >
@@ -144,11 +145,11 @@ export default function CompBySizeChart({ data }: Props) {
               />
               <Tooltip
                 content={<SizeTooltip />}
-                cursor={{ fill: "var(--color-surface)" }}
+                cursor={{ fill: "var(--color-blue-light)" }}
               />
               <ReferenceLine
                 y={weightedMean}
-                stroke="var(--color-amber)"
+                stroke="var(--color-blue)"
                 strokeDasharray="4 3"
                 strokeWidth={1.5}
                 label={{
@@ -156,7 +157,7 @@ export default function CompBySizeChart({ data }: Props) {
                   position: "insideBottomLeft",
                   fontSize: 10,
                   fontFamily: "var(--font-mono)",
-                  fill: "var(--color-amber)",
+                  fill: "var(--color-blue)",
                   dx: 8,
                   dy: -4,
                 }}

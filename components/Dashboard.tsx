@@ -73,10 +73,6 @@ export default function Dashboard({ initialStats }: { initialStats: StatStrings 
           <StatCard label="90th Percentile"   value={statCards.p90} />
         </section>
 
-        <div className="peer-group-banner">
-          Peer Group includes: Informatica, Asana, Black Duck, BlackLine, Coursera, Freshworks, Twitch, Zscaler, Five9, PagerDuty, Bill.com, MongoDB, Mozilla, Guidewire Software, Samsara, and Zuora
-        </div>
-
         <section className="dashboard-grid">
           <div className="area-mix">
             <CompMixChart data={mix} />

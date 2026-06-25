@@ -5,28 +5,31 @@
    ============================================================ */
 
 :root {
-  /* ---- palette ---- */
-  --color-bg: #faf9f5;
-  --color-surface: #f2f0ea;
-  --color-surface-blue: #eef4fb;
-  --color-surface-amber: #fdf8ee;
-  --color-border: rgba(0, 0, 0, 0.08);
-  --color-border-strong: rgba(0, 0, 0, 0.15);
+  /* ---- palette (dark — mirrors SecLeadershipBenchmark) ---- */
+  --color-bg: #0d1b2e;            /* page background */
+  --color-surface: #122338;       /* cards, sidebar, header */
+  --color-surface-deep: #0b1f3a;  /* deeper framing */
+  --color-surface-blue: rgba(47, 128, 237, 0.12);
+  --color-surface-amber: rgba(201, 164, 76, 0.12);
+  --color-border: rgba(247, 249, 252, 0.10);
+  --color-border-strong: rgba(247, 249, 252, 0.18);
 
-  --color-ink: #1a1a18;
-  --color-ink-secondary: #444441;
-  --color-ink-tertiary: #6b6b67;
-  --color-ink-muted: #9b9b97;
+  --color-ink: #f7f9fc;
+  --color-ink-secondary: rgba(247, 249, 252, 0.65);
+  --color-ink-tertiary: rgba(247, 249, 252, 0.45);
+  --color-ink-muted: rgba(247, 249, 252, 0.38);
 
-  --color-blue: #185fa5;
-  --color-blue-mid: #378add;
-  --color-blue-light: #eef4fb;
+  /* blue role -> cobalt signal/active */
+  --color-blue: #2f80ed;
+  --color-blue-mid: #4f9bf5;
+  --color-blue-light: rgba(47, 128, 237, 0.12);
 
-  --color-amber: #ba7517;
-  --color-amber-mid: #ef9f27;
-  --color-amber-light: #fdf8ee;
+  /* amber role -> champagne (the PRIMARY data accent) */
+  --color-amber: #c9a44c;
+  --color-amber-mid: #a8873a;
+  --color-amber-light: rgba(201, 164, 76, 0.12);
 
-  --color-champagne: #c9a96e;
+  --color-champagne: #c9a44c;
 
   /* ---- typography ---- */
   --font-display: var(--font-display-google), "Cormorant Garamond", Georgia, serif;
@@ -42,13 +45,13 @@
   --muted: var(--color-ink-tertiary);
   --grid: var(--color-border);
   --border: var(--color-border);
-  --panel: #ffffff;
-  --accent: var(--color-blue);
-  --c1: var(--color-blue);        /* industry bars, box stroke, mix "Base" */
-  --c2: var(--color-blue-mid);    /* comp-by-size bars */
-  --c3: var(--color-amber-mid);   /* functions bars, mix "Bonus" */
+  --panel: var(--color-surface);
+  --accent: var(--color-champagne);
+  --c1: var(--color-champagne);   /* mix "Base" / primary bars */
+  --c2: var(--color-champagne);   /* comp-by-size bars (primary data) */
+  --c3: var(--color-amber-mid);   /* mix "Bonus" (champagne-mid) */
   --c4: var(--color-blue-light);  /* box IQR fill */
-  --c5: var(--color-champagne);   /* mix "Equity" */
+  --c5: var(--color-blue);        /* mix "Equity" -> cobalt accent */
 }
 
 /*
@@ -176,9 +179,15 @@ h1,
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
-  background: #ffffff;
+  background: var(--color-surface-deep);
   border-bottom: 0.5px solid var(--color-border);
   z-index: 100;
+}
+
+/* logo ships as solid black on transparent — invert to near-white for the dark header */
+.dashboard-header img {
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
 }
 
 .header-title {
@@ -239,8 +248,8 @@ h1,
   font-family: var(--font-sans);
   font-size: 13px;
   color: var(--color-blue);
-  background: rgba(24, 95, 165, 0.07);
-  border: 0.5px solid rgba(24, 95, 165, 0.2);
+  background: rgba(47, 128, 237, 0.12);
+  border: 0.5px solid rgba(47, 128, 237, 0.45);
   border-radius: 4px;
   cursor: pointer;
   padding: 4px 10px;
@@ -252,7 +261,7 @@ h1,
 }
 
 .sidebar-reset:hover {
-  background: rgba(24, 95, 165, 0.13);
+  background: rgba(47, 128, 237, 0.20);
 }
 
 /* --- sidebar accordion section --- */
@@ -276,7 +285,7 @@ h1,
 }
 
 .sidebar-section-trigger:hover {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(247, 249, 252, 0.04);
 }
 
 .sidebar-section-title {
@@ -355,11 +364,11 @@ h1,
 }
 
 .sidebar-check-item:hover {
-  background: rgba(24, 95, 165, 0.06);
+  background: rgba(47, 128, 237, 0.10);
 }
 
 .sidebar-check-item--active {
-  background: rgba(24, 95, 165, 0.08);
+  background: rgba(47, 128, 237, 0.18);
 }
 
 .sidebar-check-box {
@@ -372,7 +381,7 @@ h1,
   justify-content: center;
   flex-shrink: 0;
   transition: all 0.1s;
-  background: #fff;
+  background: rgba(247, 249, 252, 0.05);
 }
 
 .sidebar-check-box--checked {
@@ -401,7 +410,7 @@ h1,
   height: 32px;
   border: 0.5px solid var(--color-border-strong);
   border-radius: 6px;
-  background: #fff;
+  background: var(--color-surface-deep);
   padding: 0 8px;
   color: var(--color-ink);
   cursor: pointer;
@@ -489,18 +498,18 @@ h1,
 .stats-row {
   display: flex;
   align-items: stretch;
-  gap: 12px;
-  padding: 0.75rem 1.25rem;
+  gap: 14px;
+  padding: 1rem 1.25rem;
   overflow: hidden;
   flex-shrink: 0;
 }
 
 .stat-card {
   flex: 1;
-  background: #ffffff;
+  background: var(--color-surface);
   border: 0.5px solid var(--color-border);
   border-radius: var(--radius);
-  padding: 1rem 1.25rem;
+  padding: 1.5rem 1.5rem;
   min-width: 0;
   display: flex;
   flex-direction: column;
@@ -525,15 +534,15 @@ h1,
 .stat-label {
   font-family: var(--font-sans);
   font-weight: 500;
-  font-size: 13px;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   color: var(--color-ink-tertiary);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .stat-value {
-  font-size: 26px;
+  font-size: 34px;
   line-height: 1;
 }
 
@@ -542,20 +551,6 @@ h1,
   font-size: 13px;
   color: var(--color-ink-muted);
   margin-top: 4px;
-}
-
-/* ---------- peer group banner ---------- */
-
-.peer-group-banner {
-  padding: 5px 1.25rem 5px calc(1.25rem + 3px);
-  margin: 0 1.25rem 8px;
-  border-left: 3px solid var(--color-blue);
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--color-ink);
-  flex-shrink: 0;
-  line-height: 1.4;
 }
 
 /* ---------- chart grid ---------- */
@@ -593,7 +588,7 @@ h1,
 /* ---------- panels ---------- */
 
 .panel {
-  background: #ffffff;
+  background: var(--color-surface);
   border: 0.5px solid var(--color-border);
   border-radius: 10px;
   padding: 1.25rem;
